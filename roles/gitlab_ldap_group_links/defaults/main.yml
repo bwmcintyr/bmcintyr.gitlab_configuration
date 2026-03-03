@@ -1,0 +1,15 @@
+---
+# These are the default variables common to most gitlab configuration roles
+# gitlab_api_url
+# gitlab_api_token
+# gitlab_validate_certs
+
+gitlab_ldap_group_links: []
+gitlab_ldap_group_links_ldap_provider: ldapmain
+gitlab_ldap_group_links_secure_logging: "{{ gitlab_configuration_secure_logging | default('true') }}"
+gitlab_ldap_group_links_async_retries: "{{ gitlab_configuration_async_retries | default(50) }}"
+gitlab_ldap_group_links_async_delay: "{{ gitlab_configuration_async_delay | default(1) }}"
+gitlab_ldap_group_links_loop_delay: "{{ gitlab_configuration_loop_delay | default(0) }}"
+gitlab_ldap_group_links_configuration_state: "{{ gitlab_configuration_state | default('present') }}"
+gitlab_configuration_async_dir:
+...

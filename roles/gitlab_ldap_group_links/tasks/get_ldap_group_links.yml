@@ -1,0 +1,30 @@
+---
+
+- name: Get LDAP group links block
+  no_log: "{{ gitlab_ldap_group_links_secure_logging }}"
+  block:
+
+    - name: GitLab | Get existing LDAP group links for subgroup
+      register: __get_group_links_result
+      ansible.builtin.uri:
+        url: "{{ gitlab_api_url }}/api/v4/groups/{{ __gitlab_ldap_group_links_item['group_name'] | replace('/','%2F') }}/ldap_group_links"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        method: GET
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_api_token }}"
+        status_code: [200, 404]
+
+    - debug:
+        msg: "{{ __get_group_links_result }}"
+      
+
+    - name: Add existing links to list
+      ansible.builtin.set_fact:
+        gitlab_existing_ldap_links: "{{ gitlab_existing_ldap_links | default({}) | combine({__gitlab_ldap_group_links_item['group_name']: __get_group_links_result['json'] }) }}"
+
+    - debug:
+        msg: "{{ gitlab_existing_ldap_links }}"
+
+
+
+...

@@ -1,0 +1,58 @@
+---
+
+gitlab_configuration_state: present
+gitlab_configuration_secure_logging: 'false'
+gitlab_configuration_async_retries: 50
+gitlab_configuration_async_delay: 1
+gitlab_configuration_loop_delay: 0
+gitlab_configuration_async_dir:
+
+gitlab_configuration_dispatcher_exclude_roles: []
+
+gitlab_configuration_roles:
+  - role: gitlab_groups
+    var: gitlab_groups
+    tags: gitlab_groups
+  - role: gitlab_projects
+    var: gitlab_projects
+    tags: gitlab_projects
+  - role: gitlab_group_members
+    var: gitlab_group_members
+    tags: gitlab_group_members
+  - role: gitlab_project_members
+    var: gitlab_project_members
+    tags: gitlab_project_members
+  - role: gitlab_project_branches
+    var: gitlab_project_branches
+    tags: gitlab_project_branches
+  - role: gitlab_ldap_group_links
+    var: gitlab_ldap_group_links
+    tags: gitlab_ldap_group_link
+
+gitlab_configuration_dispatcher_roles: "{{ gitlab_configuration_roles | rejectattr('role', 'in', gitlab_configuration_dispatcher_exclude_roles) }}"
+
+# The following are supplied by a custom credential type in AAP
+gitlab_api_url: "{{ gitlab_url }}"
+gitlab_api_token: "{{ gitlab_pat }}"
+gitlab_validate_certs: true
+
+operation_translate:
+  present:
+    verb: Create/Update
+    action: creation
+    uri_method: POST
+  absent:
+    verb: Remove
+    action: deletion
+    uri_method: DELETE
+  exists:
+    verb: Already Exists
+    action: exists
+  enabled:
+    verb: Enabled
+    action: enabled
+  disabled:
+    verb: Disabled
+    action: disabled
+
+...

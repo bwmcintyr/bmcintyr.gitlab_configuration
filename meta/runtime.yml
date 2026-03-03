@@ -1,0 +1,5 @@
+# meta/runtime.yml
+---
+requires_ansible: '>=2.14.0'  # Minimum Ansible Core version required
+
+...

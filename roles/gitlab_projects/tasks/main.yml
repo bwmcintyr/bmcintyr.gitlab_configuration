@@ -1,0 +1,71 @@
+---
+
+
+- name: Manage GitLab Projects Block
+  no_log: "{{ gitlab_projects_secure_logging }}"
+  block:
+   
+    - name: GitLab Projects | Configuration
+      community.general.gitlab_project:
+        api_url: "{{ gitlab_api_url }}"
+        api_token: "{{ gitlab_api_token }}"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        name: "{{ __gitlab_projects_item['name'] }}"
+        description: "{{ __gitlab_projects_item['description'] | default(omit) }}"
+        group: "{{ __gitlab_projects_item['group'] | default(omit) }}"
+        state: "{{ __gitlab_projects_item['state'] | default(gitlab_configuration_state) | default('present') }}"
+        default_branch: "{{ __gitlab_projects_item['default_branch'] | default('main') }}"
+        issues_enabled: "{{ __gitlab_projects_item['issues_enabled'] | default(omit) }}"
+        wiki_enabled: "{{ __gitlab_projects_item['wiki_enabled'] | default(omit) }}"
+        initialize_with_readme: "{{ __gitlab_projects_item['initialize_with_readme'] | default(omit) }}"
+        shared_runners_enabled: "{{ __gitlab_projects_item['shared_runners_enabled'] | default(omit) }}"
+      loop: "{{ gitlab_projects }}"
+      loop_control:
+        loop_var: __gitlab_projects_item
+        label: "{{ __operation['verb'] }} GitLab Project {{ __gitlab_projects_item['name'] }}" 
+        pause: "{{ gitlab_projects_loop_delay }}"
+      async: 1000
+      poll: 0
+      register: __gitlab_projects_job_async
+      changed_when: not __gitlab_projects_job_async['changed']
+      vars:
+        __operation: "{{ operation_translate[__gitlab_projects_item.state | default(gitlab_configuration_state) | default('present')] }}"
+
+    - name: GitLab Projects | Wait for configuration to finish
+      when:
+        - not ansible_check_mode
+        - __gitlab_projects_job_async_results_item['ansible_job_id'] is defined
+      ansible.builtin.include_role:
+        name: truist.gitlab_configuration.collect_async_status
+      loop: "{{ __gitlab_projects_job_async['results'] }}"
+      loop_control:
+        loop_var: __gitlab_projects_job_async_results_item
+        label: "{{ __operation['verb'] }} GitLab Project {{ __gitlab_projects_job_async_results_item['__gitlab_projects_item']['name'] }} | Wait for GitLab Project {{ __operation['action'] }}" 
+      vars:
+        cas_secure_logging: "{{ gitlab_projects_secure_logging }}"
+        cas_async_delay: "{{ gitlab_projects_async_delay }}"
+        cas_async_retries: "{{ gitlab_projects_async_retries }}"
+        cas_job_async_results_item: "{{ __gitlab_projects_job_async_results_item }}"
+        cas_register_subvar: gitlab_projects
+        cas_error_list_var_name: gitlab_projects_errors
+        __operation: "{{ operation_translate[__gitlab_projects_job_async_results_item.__gitlab_projects_item.state | default(gitlab_configuration_state) | default('present')] }}"
+        cas_object_label: "{{ __operation.verb }} GitLab Projects {{ __gitlab_projects_job_async_results_item.__gitlab_projects_item.name }} Wait for GitLab Project {{ __operation['action'] }}"
+
+  always:
+    - name: Clean up async results files
+      when:
+        - not ansible_check_mode
+        - __gitlab_projects_job_async_results_item['ansible_job_id'] is defined
+      ansible.builtin.async_status:
+        jid: "{{ __gitlab_projects_job_async_results_item['ansible_job_id'] }}"
+        mode: cleanup
+      loop: "{{ __gitlab_projects_job_async['results'] }}"
+      loop_control:
+        loop_var: __gitlab_projects_job_async_results_item
+        label: "Cleaning up job results file: {{ __gitlab_projects_job_async_results_item['results_file'] | default('Unknown') }}"
+      
+     
+
+
+
+...

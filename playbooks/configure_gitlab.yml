@@ -1,0 +1,10 @@
+---
+- name: Gitlab Configuration
+  hosts: localhost
+  connection: local
+  gather_subset: [min]
+  tasks:
+    - name: Include gitlab configuration dispatch role
+      ansible.builtin.include_role:
+        name: truist.gitlab_configuration.dispatch
+...

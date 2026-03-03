@@ -1,0 +1,65 @@
+---
+
+
+- name: Manage GitLab Groups Block
+  no_log: "{{ gitlab_groups_secure_logging }}"
+  block:
+   
+    - name: GitLab Groups | Configuration
+      community.general.gitlab_group:
+        api_url: "{{ gitlab_api_url }}"
+        api_token: "{{ gitlab_api_token }}"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        name: "{{ __gitlab_groups_item['name'] }}"
+        description: "{{ __gitlab_groups_item['description'] | default(omit) }}"
+        parent: "{{ __gitlab_groups_item['parent'] | default(omit) }}"
+        state: "{{ __gitlab_groups_item['state'] | default(gitlab_configuration_state) | default('present') }}"
+      loop: "{{ gitlab_groups }}"
+      loop_control:
+        loop_var: __gitlab_groups_item
+        label: "{{ __operation['verb'] }} GitLab Group {{ __gitlab_groups_item['name'] }}" 
+        pause: "{{ gitlab_groups_loop_delay }}"
+      async: 1000
+      poll: 0
+      register: __gitlab_groups_job_async
+      changed_when: not __gitlab_groups_job_async['changed']
+      vars:
+        __operation: "{{ operation_translate[__gitlab_groups_item.state | default(gitlab_configuration_state) | default('present')] }}"
+
+    - name: GitLab Groups | Wait for configuration to finish
+      when:
+        - not ansible_check_mode
+        - __gitlab_groups_job_async_results_item['ansible_job_id'] is defined
+      ansible.builtin.include_role:
+        name: truist.gitlab_configuration.collect_async_status
+      loop: "{{ __gitlab_groups_job_async['results'] }}"
+      loop_control:
+        loop_var: __gitlab_groups_job_async_results_item
+        label: "{{ __operation['verb'] }} GitLab Group {{ __gitlab_groups_job_async_results_item['__gitlab_groups_item']['name'] }} | Wait for GitLab Group {{ __operation['action'] }}" 
+      vars:
+        cas_secure_logging: "{{ gitlab_groups_secure_logging }}"
+        cas_async_delay: "{{ gitlab_groups_async_delay }}"
+        cas_async_retries: "{{ gitlab_groups_async_retries }}"
+        cas_job_async_results_item: "{{ __gitlab_groups_job_async_results_item }}"
+        cas_register_subvar: gitlab_groups
+        cas_error_list_var_name: gitlab_groups_errors
+        __operation: "{{ operation_translate[__gitlab_groups_job_async_results_item.__gitlab_groups_item.state | default(gitlab_configuration_state) | default('present')] }}"
+        cas_object_label: "{{ __operation.verb }} GitLab Groups {{ __gitlab_groups_job_async_results_item.__gitlab_groups_item.name }} Wait for GitLab Group {{ __operation['action'] }}"
+  always:
+    - name: Clean up async results files
+      when:
+        - not ansible_check_mode
+        - __gitlab_groups_job_async_results_item['ansible_job_id'] is defined
+      ansible.builtin.async_status:
+        jid: "{{ __gitlab_groups_job_async_results_item['ansible_job_id'] }}"
+        mode: cleanup
+      loop: "{{ __gitlab_groups_job_async['results'] }}"
+      loop_control:
+        loop_var: __gitlab_groups_job_async_results_item
+        label: "Cleaning up job results file: {{ __gitlab_groups_job_async_results_item['results_file'] | default('Unknown') }}"
+      
+     
+
+
+
+...

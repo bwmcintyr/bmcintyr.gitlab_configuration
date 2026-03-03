@@ -1,0 +1,75 @@
+---
+# gitlab_branches:
+#   - name: dev
+#     project:
+#     ref_branch: main
+
+
+- name: Manage GitLab Project Branches Block
+  no_log: "{{ gitlab_project_branches_secure_logging }}"
+  block:
+   
+    - name: GitLab Project Branches | Configuration
+      community.general.gitlab_branch:
+        api_url: "{{ gitlab_api_url }}"
+        api_token: "{{ gitlab_api_token }}"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        project: "{{ __gitlab_project_branches_item['project'] }}"
+        ref_branch: "{{ __gitlab_project_branches_item['ref_branch'] | default('main') }}"
+        branch: "{{ __gitlab_project_branches_item['name'] }}"
+        state: "{{ __gitlab_project_branches_item['state'] | default(gitlab_configuration_state) | default('present') }}"
+
+    - name: GitLab Project Branches | Configuration
+      community.general.gitlab_project_branches:
+        api_url: "{{ gitlab_api_url }}"
+        api_token: "{{ gitlab_api_token }}"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        project: "{{ __gitlab_project_branches_item['project'] }}"
+        gitlab_user: "{{ __gitlab_project_branches_item['gitlab_user'] }}"
+        access_level: "{{ __gitlab_project_branches_item['access_level'] }}"
+        state: "{{ __gitlab_project_branches_item['state'] | default(gitlab_configuration_state) | default('present') }}"
+      loop: "{{ gitlab_project_branches }}"
+      loop_control:
+        loop_var: __gitlab_project_branches_item
+        label: "{{ __operation['verb'] }} GitLab Project Branch {{ __gitlab_project_branches_item['gitlab_user'] }}" 
+        pause: "{{ gitlab_project_branches_loop_delay }}"
+      async: 1000
+      poll: 0
+      register: __gitlab_project_branches_job_async
+      changed_when: not __gitlab_project_branches_job_async['changed']
+      vars:
+        __operation: "{{ operation_translate[__gitlab_project_branches_item.state | default(gitlab_configuration_state) | default('present')] }}"
+
+    - name: GitLab Project Branches | Wait for configuration to finish
+      when:
+        - not ansible_check_mode
+        - __gitlab_project_branches_job_async_results_item['ansible_job_id'] is defined
+      ansible.builtin.include_role:
+        name: truist.gitlab_configuration.collect_async_status
+      loop: "{{ __gitlab_project_branches_job_async['results'] }}"
+      loop_control:
+        loop_var: __gitlab_project_branches_job_async_results_item
+        label: "{{ __operation['verb'] }} GitLab Project Branch {{ __gitlab_project_branches_job_async_results_item['__gitlab_project_branches_item']['gitlab_user'] }} | Wait for GitLab Project Branch {{ __operation['action'] }}" 
+      vars:
+        cas_secure_logging: "{{ gitlab_project_branches_secure_logging }}"
+        cas_async_delay: "{{ gitlab_project_branches_async_delay }}"
+        cas_async_retries: "{{ gitlab_project_branches_async_retries }}"
+        cas_job_async_results_item: "{{ __gitlab_project_branches_job_async_results_item }}"
+        cas_register_subvar: gitlab_project_branches
+        cas_error_list_var_name: gitlab_project_branches_errors
+        __operation: "{{ operation_translate[__gitlab_project_branches_job_async_results_item.__gitlab_project_branches_item.state | default(gitlab_configuration_state) | default('present')] }}"
+        cas_object_label: "{{ __operation.verb }} GitLab Project Branches {{ __gitlab_project_branches_job_async_results_item.__gitlab_project_branches_item.gitlab_user }} Wait for GitLab Project Branch {{ __operation['action'] }}"
+  always:
+    - name: Clean up async results files
+      when:
+        - not ansible_check_mode
+        - __gitlab_project_branches_job_async_results_item['ansible_job_id'] is defined
+      ansible.builtin.async_status:
+        jid: "{{ __gitlab_project_branches_job_async_results_item['ansible_job_id'] }}"
+        mode: cleanup
+      loop: "{{ __gitlab_project_branches_job_async['results'] }}"
+      loop_control:
+        loop_var: __gitlab_project_branches_job_async_results_item
+        label: "Cleaning up job results file: {{ __gitlab_project_branches_job_async_results_item['results_file'] | default('Unknown') }}"
+      
+...

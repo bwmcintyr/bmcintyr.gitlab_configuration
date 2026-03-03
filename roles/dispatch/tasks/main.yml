@@ -1,0 +1,29 @@
+---
+
+- name: "Run the following gitlab configuration roles: {{ gitlab_configuration_dispatcher_roles | map(attribute='role') | join(', ') }}"
+  when: vars[__role.var] is defined
+  tags: always
+  ansible.builtin.include_role:
+    name: "{{ __role['role'] }}"
+    apply:
+      tags: "{{ __role['tags'] }}"
+  loop: "{{ gitlab_configuration_dispatcher_roles }}"
+  loop_control:
+    loop_var: __role
+
+- name: Display errors and fail
+  when:
+    - gitlab_configuration_role_errors is defined
+    - gitlab_configuration_role_errors is mapping
+    - gitlab_configuration_role_errors | dict2items | selectattr('value', 'ne', []) | list | length > 0
+  ansible.builtin.debug:
+    msg:
+      - "Errors encountered applying configurations:"
+      - "{{ gitlab_configuration_role_errors }}"
+  failed_when: gitlab_configuration_role_errors | dict2items | selectattr('value', 'ne', []) | list | length > 0
+
+- name: Fail the playbook if there were errors (check mode only)
+  ansible.builtin.fail:
+    msg: The execution has failed because of errors (probably due to missing dependencies caused by check mode).
+  when: ansible_check_mode and error_flag is defined and error_flag
+...
