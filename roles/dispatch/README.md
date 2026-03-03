@@ -1,8 +1,8 @@
-# truist.gitlab_configuration.dispatch
+# bmcintyr.gitlab_configuration.dispatch
 
 ## Description
 
-An Ansible Role to run all roles in the truist.gitlab_configuration collection.
+An Ansible Role to run all roles in the bmcintyr.gitlab_configuration collection.
 
 ## Variables
 
@@ -52,7 +52,7 @@ gitlab_configuration_roles:
 
 Each role in each service has its own variables, for information on those please see each role which this role will call. Each role is called and each item has three elements:
 
-- `role` which is the name of the role within truist.gitlab_configuration
+- `role` which is the name of the role within bmcintyr.gitlab_configuration
 - `var` which is the variable which is used in that role. We use this to prevent the role being called if the variable is not set
 - `tags` the tags which are applied to the role so it is possible to apply tags to a playbook using the dispatcher with these tags.
 

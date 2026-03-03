@@ -1,4 +1,4 @@
-# truist.gitlab_configuration.gitlab_project_members
+# bmcintyr.gitlab_configuration.gitlab_project_members
 
 ## Description
 
@@ -79,7 +79,7 @@ gitlab_project_members:
   hosts: localhost
   connection: local
   roles:
-    - {role: truist.gitlab_configuration.gitlab_project_members, when: gitlab_project_members is defined}
+    - {role: bmcintyr.gitlab_configuration.gitlab_project_members, when: gitlab_project_members is defined}
 ```
 
 ## License

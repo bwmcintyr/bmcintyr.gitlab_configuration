@@ -36,7 +36,7 @@
         - not ansible_check_mode
         - __gitlab_projects_job_async_results_item['ansible_job_id'] is defined
       ansible.builtin.include_role:
-        name: truist.gitlab_configuration.collect_async_status
+        name: bmcintyr.gitlab_configuration.collect_async_status
       loop: "{{ __gitlab_projects_job_async['results'] }}"
       loop_control:
         loop_var: __gitlab_projects_job_async_results_item

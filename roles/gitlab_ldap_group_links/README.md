@@ -1,4 +1,4 @@
-# truist.gitlab_configuration.gitlab_ldap_group_links
+# bmcintyr.gitlab_configuration.gitlab_ldap_group_links
 
 ## Description
 
@@ -63,7 +63,7 @@ This also speeds up the overall role.
 ---
 gitlab_ldap_group_links:
   - group_name: parent_group/subgroup
-    cn: G-APP-AAP-ADMIN,OU=CORP,OU=GROUPS,OU=BB&T,DC=BBTNET,DC=COM
+    cn: G-.....
     access: 30
     provider: ldapmain
     state: present
@@ -79,7 +79,7 @@ gitlab_ldap_group_links:
   hosts: localhost
   connection: local
   roles:
-    - {role: truist.gitlab_configuration.gitlab_ldap_group_links, when: gitlab_ldap_group_links is defined}
+    - {role: bmcintyr.gitlab_configuration.gitlab_ldap_group_links, when: gitlab_ldap_group_links is defined}
 ```
 
 ## License

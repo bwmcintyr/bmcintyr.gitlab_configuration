@@ -1,4 +1,4 @@
-# truist.gitlab_configuration.gitlab_groups
+# bmcintyr.gitlab_configuration.gitlab_groups
 
 ## Description
 
@@ -79,7 +79,7 @@ gitlab_groups:
   hosts: localhost
   connection: local
   roles:
-    - {role: truist.gitlab_configuration.gitlab_groups, when: gitlab_groups is defined}
+    - {role: bmcintyr.gitlab_configuration.gitlab_groups, when: gitlab_groups is defined}
 ```
 
 ## License

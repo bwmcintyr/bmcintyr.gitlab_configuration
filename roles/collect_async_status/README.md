@@ -1,4 +1,4 @@
-# truist.gitlab_configuration.collect_async_status
+# bmcintyr.gitlab_configuration.collect_async_status
 
 ## Description
 

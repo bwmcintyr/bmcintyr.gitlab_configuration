@@ -6,5 +6,5 @@
   tasks:
     - name: Include gitlab configuration dispatch role
       ansible.builtin.include_role:
-        name: truist.gitlab_configuration.dispatch
+        name: bmcintyr.gitlab_configuration.dispatch
 ...

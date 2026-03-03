@@ -1,4 +1,4 @@
-# Truist GitLab Configuration Collection
+# bmcintyr GitLab Configuration Collection
 
 This Ansible collection allows for easy interaction with GitLab via Ansible roles using the modules from the community collections.
 
@@ -22,10 +22,10 @@ collections:
 
 ## Installing this collection
 
-You can install the truist.gitlab_configuration collection with the Ansible Galaxy CLI:
+You can install the bmcintyr.gitlab_configuration collection with the Ansible Galaxy CLI:
 
 ```console
-ansible-galaxy collection install truist.gitlab_configuration
+ansible-galaxy collection install bmcintyr.gitlab_configuration
 ```
 
 You can also include it in a `requirements.yml` file and install it with `ansible-galaxy collection install -r requirements.yml`, using the format:
@@ -33,7 +33,7 @@ You can also include it in a `requirements.yml` file and install it with `ansibl
 ```yaml
 ---
 collections:
-  - name: truist.gitlab_configuration
+  - name: bmcintyr.gitlab_configuration
     # If you need a specific version of the collection, you can specify like this:
     # version: ...
 ```
@@ -41,21 +41,21 @@ collections:
 ## Using This Collection
 
 **Install This Collection:**
-Ensure this collection (`truist.gitlab_configuration`) is installed:
+Ensure this collection (`bmcintyr.gitlab_configuration`) is installed:
 
 ```bash
-ansible-galaxy collection install truist.gitlab_configuration
+ansible-galaxy collection install bmcintyr.gitlab_configuration
 ```
 
 **Run Playbooks from This Collection:**
 To execute a playbook packaged within this collection (e.g., `configure_gitlab.yml`):
 
 ```console
-ansible-playbook truist.gitlab_configuration.configure_gitlab.yml
+ansible-playbook bmcintyr.gitlab_configuration.configure_gitlab.yml
 ```
 
 **Troubleshooting "couldn't resolve module/action":**
-This error usually means the required Ansible collection (e.g., `truist.gitlab_configuration` or a dependency like community.general) is:
+This error usually means the required Ansible collection (e.g., `bmcintyr.gitlab_configuration` or a dependency like community.general) is:
 
 * Not installed.
 * Incorrectly named in the playbook.
