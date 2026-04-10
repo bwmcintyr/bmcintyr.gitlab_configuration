@@ -14,7 +14,7 @@
         description: "{{ __gitlab_projects_item['description'] | default(omit) }}"
         group: "{{ __gitlab_projects_item['group'] | default(omit) }}"
         state: "{{ __gitlab_projects_item['state'] | default(gitlab_configuration_state) | default('present') }}"
-        default_branch: "{{ __gitlab_projects_item['default_branch'] | default('main') }}"
+        default_branch: "{{ __gitlab_projects_item['default_branch'] | default(omit) }}"
         issues_enabled: "{{ __gitlab_projects_item['issues_enabled'] | default(omit) }}"
         wiki_enabled: "{{ __gitlab_projects_item['wiki_enabled'] | default(omit) }}"
         initialize_with_readme: "{{ __gitlab_projects_item['initialize_with_readme'] | default(omit) }}"

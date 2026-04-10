@@ -1,0 +1,14 @@
+1.0.3
+- Fix GitLab Group LDAP Sync not immediate
+
+1.0.4
+- Add role to manage GitLab Project Variables
+
+1.0.5
+- Add role to share a GitLab Group with another GitLab group and its members (bmcintyr.gitlab_configuration.gitlab_group_share)
+- Add role to share a GitLab Project with another GitLab group and its members (bmcintyr.gitlab_configuration.gitlab_project_share)
+- Minor changes to README documentation for other roles
+
+1.0.6
+- Change access in group share and project share roles to string vs. int
+- Move no_log from blocks to tasks

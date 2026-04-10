@@ -40,9 +40,18 @@ gitlab_configuration_roles:
   - role: gitlab_group_members
     var: gitlab_group_members
     tags: gitlab_group_members
+  - role: gitlab_group_variables
+    var: gitlab_group_variables
+    tags: gitlab_group_variables
   - role: gitlab_project_members
     var: gitlab_project_members
     tags: gitlab_project_members
+  - role: gitlab_project_variables
+    var: gitlab_project_variables
+    tags: gitlab_project_variables
+  - role: gitlab_project_branches
+    var: gitlab_project_branches
+    tags: gitlab_project_branches
   - role: gitlab_ldap_group_links
     var: gitlab_ldap_group_links
     tags: gitlab_ldap_group_link

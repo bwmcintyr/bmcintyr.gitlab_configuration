@@ -1,0 +1,19 @@
+---
+# These are the default variables common to most gitlab configuration roles
+# gitlab_api_url
+# gitlab_api_token
+# gitlab_validate_certs
+# gitlab_configuration_async_dir
+
+gitlab_project_share: []
+gitlab_project_share_secure_logging: true
+gitlab_project_share_loop_delay: "{{ gitlab_configuration_loop_delay | default(0) }}"
+gitlab_project_share_configuration_state: "{{ gitlab_configuration_state | default('present') }}"
+
+gitlab_access_translate:
+  guest: 10
+  reporter: 20
+  developer: 30
+  maintainer: 40
+  owner: 50
+...
