@@ -1,0 +1,12 @@
+---
+
+- name: Include tasks to share gitlab group
+  ansible.builtin.include_tasks:
+    file: share_gitlab_group.yml
+  loop: "{{ gitlab_group_shares }}"
+  loop_control:
+    loop_var: __gitlab_group_shares_item
+    label: "{{ __operation['verb'] }} GitLab Group {{ __gitlab_group_shares_item['name'] }}" 
+    pause: "{{ gitlab_group_share_loop_delay }}"
+  vars:
+    __operation: "{{ operation_translate[__gitlab_group_shares_item.state | default(gitlab_configuration_state) | default('present')] }}"

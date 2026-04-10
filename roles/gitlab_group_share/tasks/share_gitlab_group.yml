@@ -1,0 +1,76 @@
+---
+# gitlab_group_shares:
+#   - name: group_to_share
+#     group_full_path: parent/group_to_share_with
+#     group_access: 30 
+#     expires_at: YYYY-MM-DD
+#     state: present
+
+- name: Get GitLab group details block
+  block:
+    - name: GitLab | Get id of group to share to
+      no_log: "{{ gitlab_group_share_secure_logging }}"
+      register: __get_member_group_id_result
+      ansible.builtin.uri:
+        url: "{{ gitlab_api_url }}/api/v4/groups/{{ __gitlab_group_shares_item['group_full_path'] | replace('/','%2F') }}"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        method: GET
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_api_token }}"
+        status_code: [200]
+    - name: Set group id
+      ansible.builtin.set_fact:
+        gitlab_member_group_id: "{{ __get_member_group_id_result['json']['id']  }}"
+  rescue:
+    - name: Task failed
+      ansible.builtin.fail:
+       msg: "{{ __get_member_group_id_result['json']['message'] }}"
+
+- name: Get Gitlab group shared groups block
+  block:
+    - name: GitLab | Get group
+      no_log: "{{ gitlab_group_share_secure_logging }}"
+      register: __get_gitlab_group_details
+      ansible.builtin.uri:
+        url: "{{ gitlab_api_url }}/api/v4/groups/{{ __gitlab_group_shares_item['name'] | replace('/','%2F') }}"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        method: GET
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_api_token }}"
+        status_code: [200,201,204,409] 
+        body_format: json
+        body:
+          group_id: "{{ gitlab_member_group_id | default(__gitlab_group_shares_item['group_id']) }}"
+          group_access: "{{ __gitlab_group_shares_item['group_access'] | default(30) }}"
+          expires_at: "{{ __gitlab_group_shares_item['group_access'] | default('') }}"
+  rescue:
+    - name: Task failed
+      ansible.builtin.fail:
+       msg: "{{ __get_gitlab_group_details['msg'] }}"
+
+- name: Share Gitlab group block
+  block:
+    - name: GitLab | Share group
+      no_log: "{{ gitlab_group_share_secure_logging }}"
+      when: >
+        __operation['uri_method'] == "DELETE" and __gitlab_group_shares_item['group_full_path'] in __get_gitlab_group_details['json']['shared_with_groups'] | selectattr('group_full_path', 'defined') | map(attribute='group_full_path')
+        or __operation['uri_method'] == "POST" and __gitlab_group_shares_item['group_full_path'] not in __get_gitlab_group_details['json']['shared_with_groups'] | selectattr('group_full_path', 'defined') | map(attribute='group_full_path')
+      register: __share_gitlab_group_result
+      ansible.builtin.uri:
+        url: "{{ gitlab_api_url }}/api/v4/groups/{{ __gitlab_group_shares_item['name'] | replace('/','%2F') }}/share{{ (__operation['uri_method'] == 'DELETE') | ternary('/' + gitlab_member_group_id | default(__gitlab_group_shares_item['group_id']), '') }}"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        method: "{{ __operation['uri_method'] }}"
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_api_token }}"
+        status_code: [200,201,204,409] 
+        body_format: json
+        body:
+          group_id: "{{ gitlab_member_group_id | default(__gitlab_group_shares_item['group_id']) }}"
+          group_access: "{{ gitlab_access_translate[__gitlab_group_shares_item['group_access'] | lower] | default(10) }}"
+          expires_at: "{{ __gitlab_group_shares_item['group_access'] | default('') }}"
+  rescue:
+    - name: Task failed
+      ansible.builtin.fail:
+       msg: "{{ __share_gitlab_group_result['json']['message'] }}"
+
+...

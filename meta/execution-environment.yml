@@ -1,0 +1,20 @@
+---
+version: 3
+
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+
+dependencies:
+  galaxy:
+    collections:
+      - name: community.general
+
+  python:
+    - python-gitlab
+
+  system: []
+
+...
+
+     

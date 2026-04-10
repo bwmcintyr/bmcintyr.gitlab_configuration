@@ -75,7 +75,7 @@ gitlab_project_members:
 
 ```yaml
 ---
-- name: Playbook to configure GitLab post installation
+- name: Playbook to mange GitLab resources
   hosts: localhost
   connection: local
   roles:

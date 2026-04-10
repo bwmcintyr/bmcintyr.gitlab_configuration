@@ -2,7 +2,7 @@
 
 # gitlab_ldap_group_links:
 #   - group_name: test
-#     cn: G-......
+#     cn: GROUP,OU=OUNAME,DC=DOMAIN,DC=COM
 #     access: 30
 #     provider: ldapmain
 #     state: present
@@ -76,10 +76,30 @@
       loop_control:
         loop_var: __gitlab_ldap_group_links_job_async_results_item
         label: "Cleaning up job results file: {{ __gitlab_ldap_group_links_job_async_results_item['results_file'] | default('Unknown') }}"
-      
      
-
-
+- name: Manage GitLab LDAP sync block
+  no_log: "{{ gitlab_ldap_group_links_secure_logging }}"
+  when: gitlab_ldap_group_links_force_sync | bool
+  block:
+    - name: GitLab LDAP Group Links | Force Sync
+      register: __gitlab_ldap_sync
+      ansible.builtin.uri:
+        url: "{{ gitlab_api_url }}/api/v4/groups/{{ __gitlab_ldap_sync_item | replace('/','%2F') }}/ldap_sync"
+        validate_certs: "{{ gitlab_validate_certs | default(true) }}"
+        method: POST
+        headers:
+          PRIVATE-TOKEN: "{{ gitlab_api_token }}"
+        status_code: [202]
+      loop: "{{ gitlab_ldap_group_links | selectattr('group_name', 'defined') | map(attribute='group_name') | unique }}"
+      loop_control:
+        loop_var: __gitlab_ldap_sync_item
+        label: "Force ldap sync for group: {{ __gitlab_ldap_sync_item }}"
+  rescue:
+    - name: Print warning
+      ansible.builtin.debug:
+        msg: >
+          "WARNING: Unable to force ldap sync."
+          {{ __gitlab_ldap_sync['msg'] }}
 
 ...
 
